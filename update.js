@@ -1,6 +1,17 @@
 var fs = require('fs'),
     request = require('request')
 
+if (!fs.existsSync("push-url.txt")) {
+   console.error("push-url.txt is missing, please add the file and put the slack push URL in there");
+   process.exit(1);
+   return;
+}
+if (!fs.existsSync('last-end.txt')) {
+   console.log("No last-end.txt file, making one");
+   var now = Math.round(Date.now() / 1000)
+   fs.writeFileSync('last-end.txt', now - (24*60*60)); // one day back
+}
+
 var targetPush = fs.readFileSync("push-url.txt");
 var lastTime = parseInt(fs.readFileSync('last-end.txt'), 10);
 var currentTime = Math.round(Date.now() / 1000);
@@ -27,7 +38,7 @@ function getJSON(target, success, error) {
          success(JSON.parse(body), response, body);
       }
       else {
-         console.log("failed: " + target);
+         console.log("get failed: " + target);
          error(err, response, body);
       }
    });
@@ -119,10 +130,10 @@ getJSON(QuestionURL,
 );
 
 function handleError(err, response, body) {
-   console.log("Error getting with request: " + err);
-   console.log(err);
-   console.log(response);
-   console.log(body);
+   console.error("Error getting with request: " + err);
+   console.error(err);
+   console.error(response);
+   console.error(body);
    process.exit(1);
 }
 
@@ -152,10 +163,10 @@ function sendToSlack(res) {
             fs.writeFileSync('last-end.txt', currentTime);
          }
          else {
-            console.log("Error pushing to Slack");
-            console.log(error);
-            console.log(response);
-            console.log(body);
+            console.error("Error pushing to Slack");
+            console.error(error);
+            console.error(response);
+            console.error(body);
             process.exit(1);
          }
       });
