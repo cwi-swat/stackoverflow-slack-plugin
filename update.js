@@ -29,7 +29,7 @@ if (!String.prototype.format) {
 }
 
 var QuestionURL = "https://api.stackexchange.com/2.2/questions?order=desc&sort=activity&tagged=rascal&site=stackoverflow";
-var TimelineURL = "https://api.stackexchange.com/2.2/questions/{2}/timeline?fromdate={0}&todate={1}&site=stackoverflow";
+var TimelineURL = "https://api.stackexchange.com/2.2/questions/{0}/timeline?site=stackoverflow";
 var AnswerURL = "http://api.stackexchange.com/2.2/questions/{2}/answers?fromdate={0}&todate={1}&order=desc&sort=activity&site=stackoverflow";
 
 function getJSON(target, success, error) {
@@ -72,10 +72,13 @@ getJSON(QuestionURL,
       if (Object.keys(currentResult).length === 0) { 
          process.exit();
       }
-      getJSON(TimelineURL.format(lastTime, currentTime, Object.keys(currentResult).join(";")), 
+      getJSON(TimelineURL.format(Object.keys(currentResult).join(";")), 
          function (timeline) {
             var checkQuestions = {};
             timeline.items.forEach(function(tl) {
+		       if (tl.creation_date <= lastTime) {
+			      return;
+			   }
                var r = currentResult[tl.question_id];
                switch(tl.timeline_type) {
                   case "question":
