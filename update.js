@@ -76,16 +76,21 @@ getJSON(QuestionURL,
          function (timeline) {
             var checkQuestions = {};
             timeline.items.forEach(function(tl) {
-		       if (tl.creation_date <= lastTime) {
-			      return;
-			   }
+               if (tl.creation_date <= lastTime) {
+                  return;
+               }
                var r = currentResult[tl.question_id];
                switch(tl.timeline_type) {
                   case "question":
                      r.actions.push(historyEvent(tl, "asked this question", ":raising_hand:"));
                      break;
                   case "revision": 
-                     r.actions.push(historyEvent(tl, "revised this question",":pencil:"));
+                     if (tl.question_id == tl.post_id) {
+                        r.actions.push(historyEvent(tl, "revised the question",":pencil:"));
+                     }
+                     else {
+                        r.actions.push(historyEvent(tl, "revised an answer", ":pencil:", getAnswerLink(tl.question_id, tl.post_id)));
+                     }
                      break;
                   case "accepted_answer":
                      r.actions.push(historyEvent(tl, "answer was accepted", ":ok_hand:", getAnswerLink(tl.question_id, tl.post_id)));
@@ -94,12 +99,10 @@ getJSON(QuestionURL,
                      checkQuestions[tl.question_id] = checkQuestions[tl.question_id] || [];
                      checkQuestions[tl.question_id].push(tl.creation_date);
                      break;
-                  case "unaccepted_answer":
-                     r.actions.push(historyEvent(tl, "revised an answer", ":pencil:", getAnswerLink(tl.question_id, tl.post_id)));
-                     break;
                   case "comment":
                      r.actions.push(historyEvent(tl, "made a comment", ":grey_question:", getCommentLink(tl.question_id, tl.post_id, tl.comment_id)));
                      break;
+                  case "unaccepted_answer":
                   case "post_state_changed":
                   case "vote_aggregate":
                   default:
