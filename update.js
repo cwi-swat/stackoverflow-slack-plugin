@@ -12,8 +12,8 @@ if (!fs.existsSync('last-end.txt')) {
    fs.writeFileSync('last-end.txt', now - (24*60*60)); // one day back
 }
 
-var targetPush = fs.readFileSync("push-url.txt");
-var lastTime = parseInt(fs.readFileSync('last-end.txt'), 10);
+var targetPush = fs.readFileSync("push-url.txt", {"encoding":"utf8"});
+var lastTime = parseInt(fs.readFileSync('last-end.txt', {"encoding":"utf8"}), 10);
 var currentTime = Math.round(Date.now() / 1000);
 
 if (!String.prototype.format) {
